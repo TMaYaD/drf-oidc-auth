@@ -136,6 +136,11 @@ class JSONWebTokenAuthentication(BaseOidcAuthentication):
             # Support for multiple audiences
             id_token['aud'] = [id_token['aud']]
 
+        if not id_token.get('iss', '').startswith('https://'):
+            # Google passes "https://accounts.google.com or accounts.google.com"
+            # which is not upto spec but, well, ¯\_(ツ)_/¯
+            id_token['iss'] = 'https://' + id_token.get('iss')
+            
         if id_token.get('iss') != self.issuer:
             msg = _('Invalid Authorization header. Invalid JWT issuer.')
             raise AuthenticationFailed(msg)
